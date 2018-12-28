@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+
+        <script src="drumset.js"></script>
+
+        <style>
+            .drumBox{
+                width: 25px;
+                height: 25px;
+                border: 1px solid #000000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="hats"></div>
+
+        <div id="snares"></div>
+
+        <div id="kicks"></div>
+
+        <div>
+            <input id="bpmInput" type="text" size=1 placeholder="120">
+            <button id="buttonInput" onclick = "handleChangeTempo()">Tempo</button>
+            <button id="subdiv" onclick = "handleSubdivisionChange()">16th Notes</button>
+        </div>
+
+        <div>
+            <button id="buttonInput" onclick = "handleStop()">Stop</button>
+        </div>
+
+    </body>
+</html>
