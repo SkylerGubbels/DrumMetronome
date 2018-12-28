@@ -6,6 +6,8 @@ let kicks = ["kicks"];
 // Array of drums sounds
 // These need to be in the same order as the drumset array
 let drumSounds = [new Audio("sounds/HH.mp3"), new Audio("sounds/Snare.mp3"), new Audio("sounds/Kick.mp3")];
+let volumeSlider;
+let volume = 0.8;
 
 // Combines all drumParts into a single set
 let drumset = [hiHats, snares, kicks];
@@ -17,18 +19,59 @@ let currentBeat = 0;
 
 let intervalVar;
 
+function handleVolumeChange(){ volume = volumeSlider.value/100;}
+
+/** function standardBeat()
+ * 
+ *  in: bool is16notes
+ *      This boolean denotes whether user wants a standard beat
+ *      with 8th or 16th note hihats
+ * 
+ *  Purpose: Quickly creates a standard beat for the user
+ */
+function standardBeat(is16notes)
+{
+    let beatMultiplier = 1;
+    if (is16notes === true) { beatMultiplier = 2; }
+
+    if (subDivision === 16 && is16notes === false) { handleSubdivisionChange(); }
+    else if (subDivision === 8 && is16notes === true) { handleSubdivisionChange(); }
+    else { handleClear(); }
+
+    for(let i = 0; i < drumset.length; ++i)
+    {
+        for(let k = 0; k < drumset[0].length; ++k)
+        {
+            if(i === 0) { handleClick(i, k); }
+            else if(i === 1 && (k === 2 * beatMultiplier || k === 6 * beatMultiplier)) { handleClick(i, k); }
+            else if (i === 2 && (k === 0 || k === 4 * beatMultiplier)) { handleClick(i, k); }
+        }
+    }
+}
+
+function handleSubmit()
+{
+    handleClear();
+
+    let selection = document.getElementById("menuSelect").value;
+    switch(selection)
+    {
+        case "standard": standardBeat(false); break;
+        case "16stan": standardBeat(true); break;
+    }
+}
+
+function handleClear() { clearDrums(); handleStop(); }
+
 function handleSubdivisionChange()
 {
     document.getElementById("subdiv").innerHTML = subDivision + "th Notes";
 
     if(subDivision === 8){ subDivision = 16;}
     else { subDivision = 8; }
-    clearDrums();
+    handleClear();
 }
 
-/**
- *  Takes user input and makes that the new tempo
- */
 function handleChangeTempo()
 {
     let tempo = document.getElementById("bpmInput").value;
@@ -57,6 +100,15 @@ function handleStop()
     currentBeat = 0;
 }
 
+/** function playDrums()
+ * 
+ *  Purpose: This checks every canvas for that specific beat and if
+ *           that specific drum is active it plays the sound
+ * 
+ *  Note: Need to reset sound.currentTime = 0. Otherwise the sound doesn't play
+ *        every beat at faster tempos
+ *  
+ */
 function playDrums()
 {
     changeColor(currentBeat);
@@ -66,6 +118,7 @@ function playDrums()
         if(drum[currentBeat].active == true) 
         { 
             drum[currentBeat].sound.currentTime = 0; 
+            drum[currentBeat].sound.volume = volume; 
             drum[currentBeat].sound.play(); 
         }
     }
@@ -122,6 +175,8 @@ function handleClick(row, col)
  */
 function initDrums()
 {
+    //createNumberCanvas();
+
     for(let i = 0; i < drumset.length; ++i)
     {
         for(let k = 0; k < subDivision; ++k)
@@ -133,6 +188,26 @@ function initDrums()
     }
 }
 
+/** 
+ * TODO: Add this when working on CSS and layout
+ */
+function createNumberCanvas()
+{
+    document.getElementById("numbers").innerHTML = `<p>`
+
+    for(let k = 0; k < subDivision; ++k)
+        {
+            document.getElementById("numbers").innerHTML += "&"
+        }
+
+    document.getElementById("numbers").innerHTML += `</p>`
+}
+
+/** function clearDrums()
+ * 
+ *  Purpose: Deletes all the canvases and redraws the empty canvases
+ *           Used when clearing or changing the subdivision
+ */
 function clearDrums()
 {
     for(let i = 0; i < drumset.length; ++i)
@@ -149,6 +224,10 @@ function clearDrums()
     addEventListenersForCanvases();
 }
 
+/** function addEventListenerForCanvas() 
+ * 
+ *  Purpose: Adds the EventListeners on all of the canvases 
+ * */
 function addEventListenersForCanvases()
 {
     for(let i = 0; i < drumset.length; ++i)
@@ -163,6 +242,8 @@ function addEventListenersForCanvases()
 // Makes sure everything is loaded before adding event listeners
 document.addEventListener("DOMContentLoaded", () => {
     
+    volumeSlider = document.getElementById("volume");
+    volumeSlider.oninput = ()=> { handleVolumeChange() };
     initDrums();
     addEventListenersForCanvases();
 })

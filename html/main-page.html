@@ -11,9 +11,13 @@
                 height: 25px;
                 border: 1px solid #000000;
             }
+
         </style>
     </head>
     <body>
+
+        <div id="numbers"></div>
+
         <div id="hats"></div>
 
         <div id="snares"></div>
@@ -22,12 +26,26 @@
 
         <div>
             <input id="bpmInput" type="text" size=1 placeholder="120">
-            <button id="buttonInput" onclick = "handleChangeTempo()">Tempo</button>
+            <button id="buttonInput" onclick = "handleChangeTempo()">Play</button>
             <button id="subdiv" onclick = "handleSubdivisionChange()">16th Notes</button>
         </div>
 
         <div>
             <button id="buttonInput" onclick = "handleStop()">Stop</button>
+            <button onclick = "handleClear()">Clear</button>
+        </div>
+
+        <div>
+            <select id = "menuSelect">
+                <option value="standard">8th Standard</option>
+                <option value="16stan">16th Standard</option>
+            </select>
+            <button id="selection" onclick="handleSubmit()">Submit</button>
+        </div>
+
+        <div>
+            <input type="range" min="0" max="100" value="80" id="volume">
+            <p id="volumeView"></p>
         </div>
 
     </body>
