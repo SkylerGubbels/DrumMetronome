@@ -1,5 +1,3 @@
-let xhttp = new XMLHttpRequest();
-
 // Different drum part names. Need to be same as div id's in main-page.html
 let hiHats = ["hats"];
 let snares = ["snares"];
@@ -22,10 +20,15 @@ let currentBeat = 0;
 
 let intervalVar;
 
+/** function saveBeat()
+ * 
+ *  Purpose: Takes the current beat and saves it under the name
+ *           entered
+ */
 function saveBeat()
 {
     let drumSave = {};
-    drumSave.beat;
+    drumSave.beat = "";
     drumSave.subdivision = subDivision;
 
     drumSave.name = document.getElementById("beatName").value;
@@ -47,8 +50,9 @@ function saveBeat()
 
     let drumJSON = JSON.stringify(drumSave);
 
-    xhttp.open("POST", "", true);
-    xhttp.send(drumJSON);
+    $.post("userText", drumJSON, function(data, status){
+        console.log(status);
+    });
 
 }
 
@@ -78,43 +82,43 @@ function changeCymbal()
     }
 }
 
-/** function standardBeat()
- * 
- *  in: bool is16notes
- *      This boolean denotes whether user wants a standard beat
- *      with 8th or 16th note hihats
- * 
- *  Purpose: Quickly creates a standard beat for the user
- */
-function standardBeat(is16notes)
-{
-    let beatMultiplier = 1;
-    if (is16notes === true) { beatMultiplier = 2; }
-
-    if (subDivision === 16 && is16notes === false) { handleSubdivisionChange(); }
-    else if (subDivision === 8 && is16notes === true) { handleSubdivisionChange(); }
-    else { handleClear(); }
-
-    for(let i = 0; i < drumset.length; ++i)
-    {
-        for(let k = 0; k < drumset[0].length; ++k)
-        {
-            if(i === 0) { handleClick(i, k); }
-            else if(i === 1 && (k === 2 * beatMultiplier || k === 6 * beatMultiplier)) { handleClick(i, k); }
-            else if (i === 2 && (k === 0 || k === 4 * beatMultiplier)) { handleClick(i, k); }
-        }
-    }
-}
-
 function handleSubmit()
 {
     handleClear();
 
-    let selection = document.getElementById("menuSelect").value;
-    switch(selection)
+    let selection = {};
+    selection.request = document.getElementById("menuSelect").value;
+    
+    $.post("userText", JSON.stringify(selection), function(data, status){
+        
+        let returnedBeat = JSON.parse(data);
+        if(returnedBeat.subdivision !== subDivision) { handleSubdivisionChange(); }
+
+        createBeat(returnedBeat.beat);
+
+    })
+}
+
+/** function createBeat(beat)
+ * 
+ *  in: beat: The string of 1's and 0's returned from server
+ *            representing active and inactive drums
+ * 
+ *  Purpose: Takes the string returned from the server
+ *           and activates the relevant drumbeats
+ */
+function createBeat(beat)
+{
+    let counter = 0;
+
+    for(let i = 0; i < drumset.length; ++i)
     {
-        case "standard": standardBeat(false); break;
-        case "16stan": standardBeat(true); break;
+        for(let k = 0; k < subDivision; ++k)
+        {
+            if(beat.charAt(counter) == "\n") { ++counter; }
+            if(beat.charAt(counter) === "1") { handleClick(i, k); }
+            ++counter;
+        }
     }
 }
 
@@ -297,10 +301,30 @@ function addEventListenersForCanvases()
     }
 }
 
+/** function getBeatNames()
+ *  
+ *  Purpose: called by addEventListener
+ *           Gets names of all saved drumbeats for dropdown menu
+ */
+function getBeatNames()
+{
+    let reqObj = {};
+    reqObj.names = "getNames";
+
+    $.post("userText", JSON.stringify(reqObj), function(data, status){
+    
+    for (let option of (JSON.parse(data)).names)
+    {
+        document.getElementById("menuSelect").innerHTML += `<option value="`+option+`">`+option+`</option>`
+    }
+    })
+}
+
 // Makes sure everything is loaded before adding event listeners
 document.addEventListener("DOMContentLoaded", () => {
     
     volumeSlider = document.getElementById("volume");
     initDrums();
     addEventListenersForCanvases();
+    getBeatNames();
 })
