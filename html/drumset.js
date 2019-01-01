@@ -1,3 +1,5 @@
+let xhttp = new XMLHttpRequest();
+
 // Different drum part names. Need to be same as div id's in main-page.html
 let hiHats = ["hats"];
 let snares = ["snares"];
@@ -22,23 +24,32 @@ let intervalVar;
 
 function saveBeat()
 {
-    let drumSave = [];
-    drumSave.subdivision = subdivision;
+    let drumSave = {};
+    drumSave.beat;
+    drumSave.subdivision = subDivision;
 
-    let counterVar = 0;
+    drumSave.name = document.getElementById("beatName").value;
+    document.getElementById("beatName").value = "";
 
     for(let i = 0; i < drumset.length; ++i)
     {
         for(let k = 0; k < subDivision; ++k)
         {
-            if(drumset[i][k].active){drumSave[counterVar] = true;}
-            else{drumSave[counterVar] = false;}
-            ++counterVar;
+            if(drumset[i][k].active){drumSave.beat += "1";}
+            else{drumSave.beat += "0";}
         }
+
+        drumSave.beat += "\n";
     }
 
+    console.log(drumSave.name)
+    document.getElementById("menuSelect").innerHTML += `<option value="`+drumSave.name+`">`+drumSave.name+`</option>`
+
     let drumJSON = JSON.stringify(drumSave);
-    
+
+    xhttp.open("POST", "", true);
+    xhttp.send(drumJSON);
+
 }
 
 /** function changeCymbal() 
