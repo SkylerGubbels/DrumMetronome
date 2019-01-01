@@ -2,16 +2,17 @@
 let hiHats = ["hats"];
 let snares = ["snares"];
 let kicks = ["kicks"];
+let crash = ["crash"];
 
 // Array of drums sounds
 // These need to be in the same order as the drumset array
-let drumSounds = [new Audio("sounds/HH.mp3"), new Audio("sounds/Snare.mp3"), new Audio("sounds/Kick.mp3")];
+let drumSounds = [new Audio("sounds/HH.wav"), new Audio("sounds/Snare.wav"), new Audio("sounds/Kick.wav"), new Audio("sounds/Crash.wav")];
 let volumeSlider;
 let volume = 0.8;
 
 // Combines all drumParts into a single set
-let drumset = [hiHats, snares, kicks];
-let drumNames = ["hats", "snares", "kicks"];
+let drumset = [hiHats, snares, kicks, crash];
+let drumNames = ["hats", "snares", "kicks", "crash"];
 
 // Whether using 8th or 16th note subdivisions
 let subDivision = 8;
@@ -19,7 +20,52 @@ let currentBeat = 0;
 
 let intervalVar;
 
-function handleVolumeChange(){ volume = volumeSlider.value/100;}
+function saveBeat()
+{
+    let drumSave = [];
+    drumSave.subdivision = subdivision;
+
+    let counterVar = 0;
+
+    for(let i = 0; i < drumset.length; ++i)
+    {
+        for(let k = 0; k < subDivision; ++k)
+        {
+            if(drumset[i][k].active){drumSave[counterVar] = true;}
+            else{drumSave[counterVar] = false;}
+            ++counterVar;
+        }
+    }
+
+    let drumJSON = JSON.stringify(drumSave);
+    
+}
+
+/** function changeCymbal() 
+ * 
+ *  Purpose: changes the sound of the cymbals
+ *           based on user radio button selection
+ */
+function changeCymbal()
+{
+    let newSound;
+
+    let radios = document.getElementsByName("cymbalType");
+    for(let sounds of radios){
+        if(sounds.checked) {
+            newSound = new Audio("sounds/"+sounds.value+".wav");
+        }
+    }
+
+    newSound.play();
+
+    drumSounds[0] = newSound;
+    
+    for(let i = 0; i < subDivision; ++i)
+    {
+        drumset[0][i].sound = newSound;
+    }
+}
 
 /** function standardBeat()
  * 
@@ -118,7 +164,7 @@ function playDrums()
         if(drum[currentBeat].active == true) 
         { 
             drum[currentBeat].sound.currentTime = 0; 
-            drum[currentBeat].sound.volume = volume; 
+            drum[currentBeat].sound.volume = volumeSlider.value/100; 
             drum[currentBeat].sound.play(); 
         }
     }
@@ -218,7 +264,8 @@ function clearDrums()
     hiHats = ["hats"];
     snares = ["snares"];
     kicks = ["kicks"];
-    drumset = [hiHats, snares, kicks];
+    crash = ["crash"];
+    drumset = [hiHats, snares, kicks, crash];
 
     initDrums();
     addEventListenersForCanvases();
@@ -243,7 +290,6 @@ function addEventListenersForCanvases()
 document.addEventListener("DOMContentLoaded", () => {
     
     volumeSlider = document.getElementById("volume");
-    volumeSlider.oninput = ()=> { handleVolumeChange() };
     initDrums();
     addEventListenersForCanvases();
 })
