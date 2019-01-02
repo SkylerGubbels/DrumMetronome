@@ -52,9 +52,22 @@
             <p id="volumeView"></p>
         </div>
 
-        <input type="radio" name="cymbalType" value="HH" checked onclick="changeCymbal()">Closed Hi-Hat</button>
-        <input type="radio" name="cymbalType" value="HHopen" onclick="changeCymbal()">Open Hi-Hat</button>
-        <input type="radio" name="cymbalType" value="Ride" onclick="changeCymbal()">Ride Cymbal</button>
+        <div>
+            <input type="radio" name="cymbalType" value="HH" checked onclick="changeCymbal()">Closed Hi-Hat</button>
+            <input type="radio" name="cymbalType" value="HHopen" onclick="changeCymbal()">Open Hi-Hat</button>
+            <input type="radio" name="cymbalType" value="Ride" onclick="changeCymbal()">Ride Cymbal</button>
+        </div>
+
+        <div>
+            <button id="section" onclick="handleSectionChange()">"A" Section</button>
+            <p>Repetitions:</p>
+            <input type="radio" name="repeats" value="4" checked onclick="repeatCheck()">4
+            <input type="radio" name = "repeats" value="8" onclick="repeatCheck()">8
+            <p>Section:</p>
+            <input type="checkbox" id="aSection" checked>A
+            <input type="checkbox" id="bSection">B
+            <p id="bar">0/4</p>
+        </div>
 
     </body>
 </html>

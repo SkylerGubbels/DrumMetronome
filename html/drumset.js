@@ -17,8 +17,50 @@ let drumNames = ["hats", "snares", "kicks", "crash"];
 // Whether using 8th or 16th note subdivisions
 let subDivision = 8;
 let currentBeat = 0;
+let currentBar = 0;
+let repetitions = 4;
+let section = "A";
 
 let intervalVar;
+
+function repeatCheck()
+{
+    let repeatButtons = document.getElementsByName("repeats");
+    for(let values of repeatButtons)
+    {
+        if(values.checked){repetitions = values.value; }
+    }
+}
+
+function handleSectionChange()
+{
+    if(section === "A") { section = "B"; document.getElementById("section").innerHTML = `"B" Section`; }
+    else {section = "A"; document.getElementById("section").innerHTML = `"A" Section`; }
+
+    clearColors();
+
+    for(let i = 0; i < drumset.length; ++i)
+    {
+        for (let k = 0; k < subDivision; ++k)
+        {
+            
+            if(section === "A" && drumset[i][k].activeA) { drumset[i][k].activeA = false; handleClick(i,k); }
+            else if (section === "B" && drumset[i][k].activeB) { drumset[i][k].activeB = false; handleClick(i,k); }
+        }
+    }
+}
+
+function clearColors()
+{
+    for(let drum of drumset)
+    {
+        for(let subdrum of drum)
+        {
+            let c = document.getElementById(subdrum.name);
+            c.style.background = "white";
+        }
+    }
+}
 
 /** function saveBeat()
  * 
@@ -38,7 +80,7 @@ function saveBeat()
     {
         for(let k = 0; k < subDivision; ++k)
         {
-            if(drumset[i][k].active){drumSave.beat += "1";}
+            if((section === "A" && drumset[i][k].activeA) || ((section === "B" && drumset[i][k].activeB))) {drumSave.beat += "1";}
             else{drumSave.beat += "0";}
         }
 
@@ -71,8 +113,6 @@ function changeCymbal()
             newSound = new Audio("sounds/"+sounds.value+".wav");
         }
     }
-
-    newSound.play();
 
     drumSounds[0] = newSound;
     
@@ -159,6 +199,7 @@ function handleStop()
     console.log("Stopping");
     clearInterval(intervalVar);
     currentBeat = 0;
+    currentBar = 0;
 }
 
 /** function playDrums()
@@ -172,11 +213,17 @@ function handleStop()
  */
 function playDrums()
 {
+    if(currentBeat === 0) { ++currentBar; console.log(currentBar); }
+    document.getElementById("bar").innerHTML = currentBar + "/" + repetitions;
+
+    if(currentBar > repetitions && 
+        document.getElementById("aSection").checked && document.getElementById("bSection").checked) { handleSectionChange(); currentBar = 1; }
+
     changeColor(currentBeat);
 
     for(let drum of drumset)
     {
-        if(drum[currentBeat].active == true) 
+        if((section === "A" && drum[currentBeat].activeA == true) || (section === "B" && drum[currentBeat].activeB === true))
         { 
             drum[currentBeat].sound.currentTime = 0; 
             drum[currentBeat].sound.volume = volumeSlider.value/100; 
@@ -184,7 +231,7 @@ function playDrums()
         }
     }
 
-    currentBeat = ++currentBeat%subDivision;
+    currentBeat = ++currentBeat%subDivision; 
 }
 
 /** function changeColor(currentBeat)
@@ -201,7 +248,8 @@ function changeColor(currentBeat)
     {
         let c = document.getElementById(drum[lastBeat].name);
 
-        if(drum[lastBeat].active == true) { c.style.background = "green"; }
+        if(section === "A" && drum[lastBeat].activeA == true) { c.style.background = "green"; }
+        else if(section === "B" && drum[lastBeat].activeB == true) { c.style.background = "green"; }
         else { c.style.background = "white"; }
 
         document.getElementById(drum[currentBeat].name).style.background = "red";
@@ -217,15 +265,19 @@ function handleClick(row, col)
 {
     let c = document.getElementById(drumset[row][col].name);
 
-    if(drumset[row][col].active == false)
+    if((section == "A" && drumset[row][col].activeA === false) || (section == "B" && drumset[row][col].activeB === false))
     {
         c.style.background = "green";
-        drumset[row][col].active = true;
+
+        if (section === "A"){ drumset[row][col].activeA = true; }
+        else { drumset[row][col].activeB = true; }
     }
     else
     {
         c.style.background = "white";
-        drumset[row][col].active = false;
+
+        if (section === "A") { drumset[row][col].activeA = false; }
+        else { drumset[row][col].activeB = false; }
     }
 }
 
@@ -244,7 +296,7 @@ function initDrums()
         {
             document.getElementById(drumNames[i]).innerHTML += `<canvas id = "` + drumNames[i] + "" + k +  `" class = "drumBox"></canvas>\n`;
 
-            drumset[i][k] = { name: drumNames[i] + k, active: false, sound: drumSounds[i] };
+            drumset[i][k] = { name: drumNames[i] + k, activeA: false, activeB: false, sound: drumSounds[i], cymbalA: "HH", cymbalB: "HH" };
         }
     }
 }
