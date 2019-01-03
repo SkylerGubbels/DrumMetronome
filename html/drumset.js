@@ -23,6 +23,11 @@ let section = { val: "A", cymbalA: "HH", cymbalB: "HH"};
 
 let intervalVar;
 
+/** function repeatCheck()
+ *  
+ *  Purpose: Called when repetition radio button is checked
+ *           and sets the repetition attribute to the correct value
+ */
 function repeatCheck()
 {
     let repeatButtons = document.getElementsByName("repeats");
@@ -32,6 +37,11 @@ function repeatCheck()
     }
 }
 
+/** function handleSectionChange()
+ * 
+ *  Purpose: Handles '"X" section' button press
+ *           Changes between A and B section for drumbeat
+ */
 function handleSectionChange()
 {
     if(section.val === "A") { section.val = "B"; document.getElementById("section").innerHTML = `"B" Section`; }
@@ -52,6 +62,11 @@ function handleSectionChange()
     cymbalSection();
 }
 
+/** function clearColors()
+ * 
+ *  Purpose: Resets all canvas colors to white
+ *           Does NOT affect the activeA && activeB attributes in drumset array
+ */
 function clearColors()
 {
     for(let drum of drumset)
@@ -127,6 +142,11 @@ function changeCymbal()
     }
 }
 
+/** function cymbalSection()
+ * 
+ *  Purpose: Retains selected cymbal between A and B section
+ * 
+ */
 function cymbalSection()
 {
     let newSound;
@@ -148,6 +168,9 @@ function cymbalSection()
     }
 }
 
+/** Handles submit button
+ *  Retrieves requested drumbeat from server
+ */
 function handleSubmit()
 {
     handleClear();
@@ -188,17 +211,21 @@ function createBeat(beat)
     }
 }
 
+/** Stops drums and clears canvases */
 function handleClear() { clearDrums(); handleStop(); }
 
+/** Changes subdivision between 8th and 16th */
 function handleSubdivisionChange()
 {
     document.getElementById("subdiv").innerHTML = subDivision + "th Notes";
 
     if(subDivision === 8){ subDivision = 16;}
     else { subDivision = 8; }
-    handleClear();
+
+    clearDrumsSubChange();
 }
 
+/** Called from 'Play' button. Changes tempo */
 function handleChangeTempo()
 {
     let tempo = document.getElementById("bpmInput").value;
@@ -211,8 +238,6 @@ function handleChangeTempo()
     
     if(subDivision === 8) { miliseconds = (60000/tempo)/2; }
     else if (subDivision === 16) { miliseconds = (60000/tempo)/4; }
-    
-    console.log(miliseconds);
 
     clearInterval(intervalVar);
     currentBeat = 0;
@@ -220,9 +245,9 @@ function handleChangeTempo()
     intervalVar = setInterval(playDrums, miliseconds);
 }
 
+/** Stops playDrums() and resets beat and bar*/
 function handleStop()
 {
-    console.log("Stopping");
     clearInterval(intervalVar);
     currentBeat = 0;
     currentBar = 0;
@@ -239,8 +264,7 @@ function handleStop()
  */
 function playDrums()
 {
-    if(currentBeat === 0) { ++currentBar; console.log(currentBar); }
-    document.getElementById("bar").innerHTML = currentBar + "/" + repetitions;
+    if(currentBeat === 0) { ++currentBar; }
 
     if(currentBar > repetitions && 
         document.getElementById("aSection").checked && document.getElementById("bSection").checked) { handleSectionChange(); currentBar = 1; }
@@ -258,6 +282,7 @@ function playDrums()
     }
 
     currentBeat = ++currentBeat%subDivision; 
+    document.getElementById("bar").innerHTML = currentBar + "/" + repetitions;
 }
 
 /** function changeColor(currentBeat)
@@ -347,7 +372,7 @@ function createNumberCanvas()
  *  Purpose: Deletes all the canvases and redraws the empty canvases
  *           Used when clearing or changing the subdivision
  */
-function clearDrums()
+function clearDrumsSubChange()
 {
     for(let i = 0; i < drumset.length; ++i)
     {
@@ -362,6 +387,23 @@ function clearDrums()
 
     initDrums();
     addEventListenersForCanvases();
+}
+
+/** function clearDrums()
+ *  
+ *  Purpose: sets all drums on current section to inactive and clears their colors
+ */
+function clearDrums()
+{
+    for(let i = 0; i < drumset.length; ++i)
+    {
+        for(let k = 0; k < subDivision; ++k)
+        {
+            if (section.val === "A") { drumset[i][k].activeA = false;}
+            else { drumset[i][k].activeB = false; }
+        }
+    }
+    clearColors();
 }
 
 /** function addEventListenerForCanvas() 
