@@ -19,7 +19,7 @@ let subDivision = 8;
 let currentBeat = 0;
 let currentBar = 0;
 let repetitions = 4;
-let section = "A";
+let section = { val: "A", cymbalA: "HH", cymbalB: "HH"};
 
 let intervalVar;
 
@@ -34,8 +34,8 @@ function repeatCheck()
 
 function handleSectionChange()
 {
-    if(section === "A") { section = "B"; document.getElementById("section").innerHTML = `"B" Section`; }
-    else {section = "A"; document.getElementById("section").innerHTML = `"A" Section`; }
+    if(section.val === "A") { section.val = "B"; document.getElementById("section").innerHTML = `"B" Section`; }
+    else {section.val = "A"; document.getElementById("section").innerHTML = `"A" Section`; }
 
     clearColors();
 
@@ -44,10 +44,12 @@ function handleSectionChange()
         for (let k = 0; k < subDivision; ++k)
         {
             
-            if(section === "A" && drumset[i][k].activeA) { drumset[i][k].activeA = false; handleClick(i,k); }
-            else if (section === "B" && drumset[i][k].activeB) { drumset[i][k].activeB = false; handleClick(i,k); }
+            if(section.val === "A" && drumset[i][k].activeA) { drumset[i][k].activeA = false; handleClick(i,k); }
+            else if (section.val === "B" && drumset[i][k].activeB) { drumset[i][k].activeB = false; handleClick(i,k); }
         }
     }
+
+    cymbalSection();
 }
 
 function clearColors()
@@ -80,7 +82,7 @@ function saveBeat()
     {
         for(let k = 0; k < subDivision; ++k)
         {
-            if((section === "A" && drumset[i][k].activeA) || ((section === "B" && drumset[i][k].activeB))) {drumSave.beat += "1";}
+            if((section.val === "A" && drumset[i][k].activeA) || ((section.val === "B" && drumset[i][k].activeB))) {drumSave.beat += "1";}
             else{drumSave.beat += "0";}
         }
 
@@ -110,12 +112,36 @@ function changeCymbal()
     let radios = document.getElementsByName("cymbalType");
     for(let sounds of radios){
         if(sounds.checked) {
-            newSound = new Audio("sounds/"+sounds.value+".wav");
+            if (section.val === "A") { section.cymbalA = sounds.value; newSound = new Audio("sounds/"+section.cymbalA+".wav"); }
+            else { section.cymbalB = sounds.value; newSound = new Audio("sounds/"+section.cymbalB+".wav"); }
+        }
+    }
+
+    newSound.play();
+
+    drumSounds[0] = newSound;
+    
+    for(let i = 0; i < subDivision; ++i)
+    {
+        drumset[0][i].sound = newSound;
+    }
+}
+
+function cymbalSection()
+{
+    let newSound;
+    let radios = document.getElementsByName("cymbalType");
+    for(let sounds of radios){
+        if((section.val === "A" && sounds.value === section.cymbalA)||(section.val === "B" && sounds.value === section.cymbalB)) {
+            if (section.val === "A") { newSound = new Audio("sounds/"+section.cymbalA+".wav"); sounds.checked = true;}
+            else { newSound = new Audio("sounds/"+section.cymbalB+".wav"); sounds.checked = true; }
         }
     }
 
     drumSounds[0] = newSound;
-    
+    newSound.play();
+
+
     for(let i = 0; i < subDivision; ++i)
     {
         drumset[0][i].sound = newSound;
@@ -223,7 +249,7 @@ function playDrums()
 
     for(let drum of drumset)
     {
-        if((section === "A" && drum[currentBeat].activeA == true) || (section === "B" && drum[currentBeat].activeB === true))
+        if((section.val === "A" && drum[currentBeat].activeA == true) || (section.val === "B" && drum[currentBeat].activeB === true))
         { 
             drum[currentBeat].sound.currentTime = 0; 
             drum[currentBeat].sound.volume = volumeSlider.value/100; 
@@ -248,8 +274,8 @@ function changeColor(currentBeat)
     {
         let c = document.getElementById(drum[lastBeat].name);
 
-        if(section === "A" && drum[lastBeat].activeA == true) { c.style.background = "green"; }
-        else if(section === "B" && drum[lastBeat].activeB == true) { c.style.background = "green"; }
+        if(section.val === "A" && drum[lastBeat].activeA == true) { c.style.background = "green"; }
+        else if(section.val === "B" && drum[lastBeat].activeB == true) { c.style.background = "green"; }
         else { c.style.background = "white"; }
 
         document.getElementById(drum[currentBeat].name).style.background = "red";
@@ -265,18 +291,18 @@ function handleClick(row, col)
 {
     let c = document.getElementById(drumset[row][col].name);
 
-    if((section == "A" && drumset[row][col].activeA === false) || (section == "B" && drumset[row][col].activeB === false))
+    if((section.val == "A" && drumset[row][col].activeA === false) || (section.val == "B" && drumset[row][col].activeB === false))
     {
         c.style.background = "green";
 
-        if (section === "A"){ drumset[row][col].activeA = true; }
+        if (section.val === "A"){ drumset[row][col].activeA = true; }
         else { drumset[row][col].activeB = true; }
     }
     else
     {
         c.style.background = "white";
 
-        if (section === "A") { drumset[row][col].activeA = false; }
+        if (section.val === "A") { drumset[row][col].activeA = false; }
         else { drumset[row][col].activeB = false; }
     }
 }
@@ -296,7 +322,7 @@ function initDrums()
         {
             document.getElementById(drumNames[i]).innerHTML += `<canvas id = "` + drumNames[i] + "" + k +  `" class = "drumBox"></canvas>\n`;
 
-            drumset[i][k] = { name: drumNames[i] + k, activeA: false, activeB: false, sound: drumSounds[i], cymbalA: "HH", cymbalB: "HH" };
+            drumset[i][k] = { name: drumNames[i] + k, activeA: false, activeB: false, sound: drumSounds[i]};
         }
     }
 }
