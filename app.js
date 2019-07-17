@@ -108,7 +108,7 @@ http.createServer(function(req, res){
         }
     })
 
-}).listen(3000);
+}).listen(process.env.PORT || 3000);
 
 console.log("Server Running at Port 3000  CNTL-C to quit");
 console.log("To Test:");
